@@ -1,0 +1,16 @@
+{
+  "name": "agent-dev-tools-marketplace",
+  "owner": {
+    "name": "leotsaiCode"
+  },
+  "metadata": {
+    "description": "Personal developer tools for coding agents. Claude Code plugins live under claude/."
+  },
+  "plugins": [
+    {
+      "name": "blast-radius-whitelist",
+      "source": "./claude/blast-radius-whitelist",
+      "description": "Blast Radius fork: holds risky shell commands, but skips rm commands whose every target an rm rule in ~/.claude/settings.json permissions.allow allows."
+    }
+  ]
+}

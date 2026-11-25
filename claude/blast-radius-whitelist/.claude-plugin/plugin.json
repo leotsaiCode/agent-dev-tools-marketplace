@@ -1,0 +1,13 @@
+{
+  "name": "blast-radius-whitelist",
+  "version": "0.1.0",
+  "description": "Blast Radius with a settings-based rm allowlist: holds risky shell commands (rm -rf, git reset --hard, git clean, force push, migrations) unless an rm is fully allowed by the rm rules in ~/.claude/settings.json permissions.allow.",
+  "author": {
+    "name": "Claude Code DevRel; modified by leotsaiCode"
+  },
+  "keywords": [
+    "mods",
+    "safety",
+    "git"
+  ]
+}
