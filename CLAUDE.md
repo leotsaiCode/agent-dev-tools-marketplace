@@ -20,7 +20,7 @@ claude --plugin-dir ./claude/blast-radius-whitelist       # try it in a live ses
 ```
 
 - `claude plugin test` has no filter flag: it runs every `*.test.ts(x)` under the given folder, each file in its own child process.
-- `tsc` depends on `.claude-plugin/types/`, which Claude Code generates (git-ignored) on `plugin validate` or load — run validate first.
+- `tsc` depends on `.claude-plugin/types/` (git-ignored), which Claude Code writes only when a session loads the mod (e.g. `claude --plugin-dir ./claude/blast-radius-whitelist`), not on `plugin validate`. `scripts/validate.ts` skips the plugin `tsc` check when they are missing, so CI does not type-check the mod.
 - CI (`.github/workflows/validate.yml`) pins Claude Code **2.1.332** and Bun 1.4.5. If a test passes locally but fails in CI, match that Claude Code version.
 
 ## Invariants enforced by `scripts/validate.ts`

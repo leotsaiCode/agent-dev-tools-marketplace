@@ -177,9 +177,15 @@ if (Bun.which("claude") === null) {
     if (existsSync(join(dir, "tests"))) {
       runCheck(["claude", "plugin", "test", dir], `claude plugin test ${rel(dir)}`);
     }
-    // Runs after validate, which writes the mod's types to .claude-plugin/types/.
+    // .claude-plugin/types/ is written only when a Claude Code session loads
+    // the mod (not by `plugin validate`), so a clean checkout such as CI has
+    // none: skip tsc there instead of failing on missing 'claude-code' types.
     if (existsSync(join(dir, "tsconfig.json"))) {
-      runCheck(["bunx", "-p", `typescript@${TYPESCRIPT_VERSION}`, "tsc", "-p", dir], `tsc (strict) ${rel(dir)}`);
+      if (!existsSync(join(dir, ".claude-plugin", "types", "claude-code", "index.d.ts"))) {
+        console.log(`\x1b[33mskip\x1b[0m tsc (strict) ${rel(dir)}: no .claude-plugin/types/ (load the mod once with \`claude --plugin-dir ${rel(dir)}\`)`);
+      } else {
+        runCheck(["bunx", "-p", `typescript@${TYPESCRIPT_VERSION}`, "tsc", "-p", dir], `tsc (strict) ${rel(dir)}`);
+      }
     }
   }
 }
