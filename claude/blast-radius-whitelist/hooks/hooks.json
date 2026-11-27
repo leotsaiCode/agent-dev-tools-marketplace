@@ -1,6 +1,6 @@
 {
-  "description": "Blast Radius (whitelist fork): a tool.call hook that holds risky Bash commands, skipping rm commands every target of which an rm rule in ~/.claude/settings.json permissions.allow allows, and a Pane that shows their blast radius.",
+  "description": "Blast Radius (whitelist fork): a tool.call hook that holds risky Bash commands, skipping rm commands every target of which an rm rule allows (from blastRadiusAllow in ~/.claude/settings.json when set, else permissions.allow), and a Pane that shows their blast radius.",
   "modules": [
-    "./blast-radius-whitelist.mjs"
+    "./register.ts"
   ]
 }

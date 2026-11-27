@@ -42,7 +42,7 @@ function world(on: On, settings: string | undefined): World {
   }))
   on('ui.open', () => {
     w.held += 1
-    return { value: { isPlaced: false } }
+    return { value: { isPlaced: false, reason: 'test: no surface' } }
   })
   on('tool.call', () => {
     w.ran += 1
@@ -155,5 +155,36 @@ describe('no usable settings', () => {
   test('allow that is not a list holds', async ($, on) => {
     const w = world(on, JSON.stringify({ permissions: { allow: 'Bash(rm -rf /private/tmp/claude-502/*/scratchpad/*)' } }))
     expect(await outcome($, w, `rm -rf ${SCRATCH}/a`)).toBe('held')
+  })
+})
+
+describe('blastRadiusAllow replaces permissions.allow', () => {
+  const OTHER = 'Bash(rm -rf /Users/tester/project/build/*)'
+  const settings = (blastRadiusAllow: unknown, allow: unknown[]) =>
+    JSON.stringify({ blastRadiusAllow, permissions: { allow } })
+
+  test('its rules allow when permissions.allow has none', async ($, on) => {
+    const w = world(on, settings(RULES, []))
+    expect(await outcome($, w, `rm -rf ${SCRATCH}/a`)).toBe('ran')
+  })
+
+  test('permissions.allow rules are ignored once it is set', async ($, on) => {
+    const w = world(on, settings(RULES, [OTHER]))
+    expect(await outcome($, w, 'rm -rf build/x')).toBe('held')
+  })
+
+  test('its own rules still apply beside permissions.allow', async ($, on) => {
+    const w = world(on, settings([OTHER], RULES))
+    expect(await outcome($, w, 'rm -rf build/x')).toBe('ran')
+  })
+
+  test('an empty list turns the allowlist off', async ($, on) => {
+    const w = world(on, settings([], RULES))
+    expect(await outcome($, w, `rm -rf ${SCRATCH}/a`)).toBe('held')
+  })
+
+  test('a value that is not a list falls back to permissions.allow', async ($, on) => {
+    const w = world(on, settings('Bash(rm -rf /x/y/*)', RULES))
+    expect(await outcome($, w, `rm -rf ${SCRATCH}/a`)).toBe('ran')
   })
 })
