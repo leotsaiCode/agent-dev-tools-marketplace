@@ -10,9 +10,11 @@ Claude Code reads the marketplace file only from `.claude-plugin/` at the reposi
 
 ## Plugins
 
-| Plugin | Description |
-|---|---|
-| [blast-radius-whitelist](claude/blast-radius-whitelist/) | A fork of the `blast-radius` mod from [anthropics/claude-code-playground](https://github.com/anthropics/claude-code-playground). It holds risky shell commands for confirmation, but lets `rm` commands through when every target is allowed by an `rm` rule in `~/.claude/settings.json` `permissions.allow`. |
+Each plugin's README covers what it does, how to configure it, and its limits.
+
+| Plugin | Summary | Details |
+|---|---|---|
+| `blast-radius-whitelist` | Holds risky shell commands (`rm -rf`, `git reset --hard`, force push, migrations) and shows what they would change; lets `rm` through when an allowlist rule in `~/.claude/settings.json` covers every target. | [claude/blast-radius-whitelist/README.md](claude/blast-radius-whitelist/README.md) |
 
 ## Install (Claude Code)
 
@@ -20,6 +22,10 @@ Claude Code reads the marketplace file only from `.claude-plugin/` at the reposi
 claude plugin marketplace add leotsaiCode/agent-dev-tools-marketplace
 claude plugin install blast-radius-whitelist@agent-dev-tools-marketplace --scope user
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Run `bun scripts/validate.ts` before you push; the GitHub Action runs the same script on every pull request and on `main`.
 
 ## License
 
