@@ -2,7 +2,7 @@
 
 > **This is a fork.** `blast-radius-whitelist` is a modified copy of the `blast-radius` mod, version 0.1.0, from [anthropics/claude-code-playground](https://github.com/anthropics/claude-code-playground), path `claude-code/mods/blast-radius`, licensed Apache-2.0.
 >
-> Modified by leotsaiCode, 2026: settings-based rm allowlist. An `rm` command is not held when every one of its targets is allowed by an `rm` rule in `~/.claude/settings.json` → `permissions.allow`. Everything else behaves as in the original. See [rm allowlist](#rm-allowlist-this-fork). The original's screenshots are not included.
+> Modified by leotsaiCode, 2026: settings-based rm allowlist. An `rm` command is not held when every one of its targets is allowed by an `rm` rule in `~/.claude/settings.json` → `blastRadiusAllow`, or `permissions.allow` when that is not set. Rewritten in TypeScript. Everything else behaves as in the original. See [rm allowlist](#rm-allowlist-this-fork). The original's screenshots are not included.
 
 A Claude Code mod that holds a risky shell command and shows you what it would change before it runs. We're sharing it as a small, complete example of a mod that pauses a tool call and asks you to decide.
 
@@ -39,6 +39,23 @@ Before holding a call, the mod reads `~/.claude/settings.json` (on every call th
 ]
 ```
 
+### A separate list: `blastRadiusAllow`
+
+To keep the mod's allowlist apart from Claude Code's own permissions, set a top-level `blastRadiusAllow` array in the same `~/.claude/settings.json`. Its entries take the same form as above.
+
+```json
+{
+  "permissions": { "allow": ["Bash(rm -rf /Users/me/project/build/*)"] },
+  "blastRadiusAllow": [
+    "Bash(rm -rf /private/tmp/claude-502/*/scratchpad/*)"
+  ]
+}
+```
+
+- When `blastRadiusAllow` is an array, it **replaces** `permissions.allow`: only its rules are used. In the example, `rm -rf /Users/me/project/build/x` is held.
+- `"blastRadiusAllow": []` turns the allowlist off: every `rm -rf` is held.
+- When the key is missing, or is not an array, `permissions.allow` is used as before.
+
 Claude Code's own `*` in a rule also matches spaces, so the rules are never matched as a glob over the whole command line. Instead:
 
 - The command is split into segments as before (`&&`, `||`, `;`, `|`, a line break). An `rm` segment is skipped only when **every** target matches some rule on its own; the segments after it are still checked, so `rm -rf <allowed> && rm -rf ~/x` is held.
@@ -72,6 +89,7 @@ Tests: `claude plugin test ./blast-radius-whitelist` runs `tests/allowlist.test.
   - An independent review before release found two problems in the measuring step, both fixed. A file named like a `find` action (for example `-delete`) that a glob matched could be read as an action while measuring, so relative paths now go to `find` with `./` in front. And a `cd` earlier on the command line was ignored, so the wrong folder was measured; the mod now follows `cd` and `git -C`. The same review led to smaller fixes: overlapping holds are queued, and the buttons always answer the command shown; an error while holding refuses the command; `git clean -e`, `src:dst` and `HEAD` force pushes are measured correctly; and sizes use `du -k`, which works on macOS as well as Linux.
   - Tested in Claude Code, before those fixes: `rm -rf build` was held for more than 30 seconds, Cancel kept the files and Proceed deleted them; `git reset --hard` listed the two changed files and Cancel kept them; `git clean -fdx` was held. Force pushes and migrations were checked against the command classifier only, not run. The fixes are covered by tests of the classifier, the measuring step and the hold queue, run with Node against a stand-in for Claude Code; they haven't been re-run in a live session.
   - This fork: the rm allowlist was added inside `classify`, per segment, with tests run by `claude plugin test` on Claude Code 2.1.332.
+  - This fork, 0.2.0: rewritten in TypeScript and split into `register.ts` (hooks and every `$` call), `classify.ts`, `allowlist.ts` and `draw.ts`; added `blastRadiusAllow`. Tests run by `claude plugin test` on Claude Code 2.1.332; not re-run in a live session.
 
 ## Run it
 
@@ -81,7 +99,7 @@ Tests: `claude plugin test ./blast-radius-whitelist` runs `tests/allowlist.test.
 - `bash`, `git`, `find` and `du` on your `PATH`. For migrations, the project's own tool (for example `python3 manage.py showmigrations`).
 - For the side pane, a terminal about 144 columns wide or more. Narrower terminals get the band above the prompt.
 
-No environment variables. The rm allowlist is read from `permissions.allow` in `~/.claude/settings.json`; with no `rm` rules there, the mod behaves like the original.
+No environment variables. The rm allowlist is read from `~/.claude/settings.json`: `blastRadiusAllow` when set, else `permissions.allow`. With no `rm` rules there, the mod behaves like the original.
 
 **Steps:**
 

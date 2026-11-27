@@ -1,0 +1,34 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.5
+
+      # Types for the root tsc check of scripts/. --frozen-lockfile fails
+      # instead of rewriting bun.lock when package.json and the lock disagree.
+      - name: Install dev dependencies
+        run: bun install --frozen-lockfile
+
+      # Pinned: `claude plugin test` uses the testing API of this version.
+      # plugin validate / test need no login, so no secret is used.
+      - name: Install Claude Code
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash -s 2.1.332
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Validate marketplace and plugins
+        run: bun scripts/validate.ts

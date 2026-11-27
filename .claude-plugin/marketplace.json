@@ -10,7 +10,8 @@
     {
       "name": "blast-radius-whitelist",
       "source": "./claude/blast-radius-whitelist",
-      "description": "Blast Radius fork: holds risky shell commands, but skips rm commands whose every target an rm rule in ~/.claude/settings.json permissions.allow allows."
+      "version": "0.2.0",
+      "description": "Blast Radius fork: holds risky shell commands, but skips rm commands whose every target an rm rule in ~/.claude/settings.json allows (blastRadiusAllow when set, else permissions.allow)."
     }
   ]
 }
